@@ -1,3 +1,5 @@
 croped/
 .DS_Store
 .idea
+Graph/
+__pycache__/
