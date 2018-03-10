@@ -17,6 +17,9 @@ import numpy as np
 import pandas as pd
 
 
+# TODO: learning rate, Adam optimizer, all layer trainable, horizontal flip aug, Imagenet mean normalize
+
+
 def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
 
     model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
@@ -57,7 +60,6 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
 
     datagen = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True)
 
-    # Compute principal components required for ZCA
     datagen.fit(x_train)
 
     # Apply normalization
