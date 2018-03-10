@@ -3,3 +3,4 @@ croped/
 .idea
 Graph/
 __pycache__/
+*.h5
