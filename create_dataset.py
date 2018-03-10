@@ -64,7 +64,7 @@ def get_dataset(df, img_size):
     X = np.array(X)
     y = np.array(y)
 
-    return X , y
+    return X, y
 
     # write_pickle(X, file_path='data/' + kind + '_images_np_arr.h5')
     # write_pickle(y, file_path='data/' + kind + '_labels_np_arr.h5')
