@@ -99,7 +99,7 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
 
     model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
     # model_vgg16_conv.summary()
-    for layer in model_vgg16_conv.layers:
+    for layer in model_vgg16_conv.layers[:25]:
         layer.trainable = False
 
     # Create your own input format (here 3x200x200)
@@ -154,7 +154,7 @@ if __name__ == '__main__':
     batch_size = 64
     nb_epoch = 50
     img_rows, img_cols = 256, 256
-    nb_classes = 17
+    nb_classes = 1
     channels = 3
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
