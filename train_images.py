@@ -10,6 +10,7 @@ from keras.layers import Input, Flatten, Dense, Dropout
 from keras.models import Model
 from keras.callbacks import EarlyStopping, TensorBoard
 from keras.utils import np_utils
+from keras.optimizers import Adam
 from sklearn.metrics import precision_score, recall_score, f1_score
 from keras.preprocessing.image import ImageDataGenerator
 from create_dataset import get_dataset
@@ -19,11 +20,19 @@ import pandas as pd
 
 # TODO: learning rate, Adam optimizer, all layer trainable, horizontal flip aug, Imagenet mean normalize
 
+def normalize_imagenet(arr):
+    arr[:, :, 0] -= 103.939
+    arr[:, :, 1] -= 116.779
+    arr[:, :, 2] -= 123.68
+    return arr
 
-def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
+
+def cnn_model_generator(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
 
     model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
     # model_vgg16_conv.summary()
+    for layer in model_vgg16_conv.layers:
+        layer.trainable = False
 
     # Create your own input format (here 3x200x200)
     input = Input(shape=(256, 256, 3), name='image_input')
@@ -41,7 +50,7 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
 
     # Create your own model
     model = Model(input=input, output=x)
-    model.compile(loss='categorical_crossentropy', optimizer='adam', metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
     stop = EarlyStopping(monitor='acc',
                              min_delta=0.001,
@@ -59,6 +68,9 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
     #           )
 
     datagen = ImageDataGenerator(featurewise_center=True, featurewise_std_normalization=True)
+    # im[:, :, 0] -= 103.939
+    # im[:, :, 1] -= 116.779
+    # im[:, :, 2] -= 123.68
 
     datagen.fit(x_train)
 
@@ -75,7 +87,63 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
                         steps_per_epoch=x_train.shape[0] // batch_size,
                         epochs=nb_epoch,
                         validation_data=(x_valid, y_valid),
-                        callbacks=[stop, tensor_board])
+                        callbacks=[stop, tensor_board],
+                        verbose=2)
+
+    score = model.evaluate(x_test, y_test)
+
+    return model, score
+
+
+def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
+
+    model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
+    # model_vgg16_conv.summary()
+    for layer in model_vgg16_conv.layers:
+        layer.trainable = False
+
+    # Create your own input format (here 3x200x200)
+    input = Input(shape=(256, 256, 3), name='image_input')
+
+    # Use the generated model
+    output_vgg16_conv = model_vgg16_conv(input)
+
+    # Add the fully-connected layers
+    x = Flatten(name='flatten')(output_vgg16_conv)
+    x = Dense(4096, activation='relu', name='fc1')(x)
+    # x = Dropout(0.5)(x)
+    x = Dense(4096, activation='relu', name='fc2')(x)
+    # x = Dropout(0.5)(x)
+    x = Dense(nb_classes, activation='softmax', name='predictions')(x)
+
+    # Create your own model
+    model = Model(input=input, output=x)
+
+    # # set the first 25 layers (up to the last conv block)
+    # # to non-trainable (weights will not be updated)
+    # for layer in model.layers[:15]:
+    #     layer.trainable = False
+
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+
+    stop = EarlyStopping(monitor='acc',
+                             min_delta=0.001,
+                             patience=2,
+                             verbose=0,
+                             mode='auto')
+
+    tensor_board = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
+
+    x_train = normalize_imagenet(x_train)
+    x_test = normalize_imagenet(x_test)
+    x_valid = normalize_imagenet(x_valid)
+
+    model.fit(x_train, y_train, batch_size=batch_size, epochs=nb_epoch,
+              verbose=1,
+              validation_data=(x_valid,y_valid),
+              class_weight='auto',
+              callbacks=[stop, tensor_board]
+              )
 
     score = model.evaluate(x_test, y_test)
 
@@ -83,10 +151,10 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
 
 
 if __name__ == '__main__':
-    batch_size = 100
-    nb_epoch = 20
+    batch_size = 64
+    nb_epoch = 50
     img_rows, img_cols = 256, 256
-    nb_classes = 17
+    nb_classes = 9
     channels = 3
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
@@ -126,7 +194,7 @@ if __name__ == '__main__':
     print("y_train Shape: ", y_valid.shape)
     print("y_test Shape: ", y_test.shape)
 
-    model, score = cnn_model(X_train, y_train, X_valid, y_valid, X_test, y_test, nb_epoch, batch_size, nb_classes)
+    model, score = cnn_model_generator(X_train, y_train, X_valid, y_valid, X_test, y_test, nb_epoch, batch_size, nb_classes)
     model.save('vgg_model.h5')
     print("Test Score:", score[0])
     print("Test Accuracy:", score[1])
