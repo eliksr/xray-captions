@@ -80,9 +80,7 @@ def get_dogcat_dataset(img_size):
     for (dirpath, dirnames, filenames) in os.walk('dog_cat/train'):
         for filename in filenames:
             image = cv2.imread(os.sep.join([dirpath, filename]))  # cv2.IMREAD_GRAYSCALE
-            plt.imshow(image)
             image = cv2.resize(image, (img_size, img_size))
-            plt.imshow(image)
             x.append(image)
             if filename.startswith('cat'):
                 y.append(1)
