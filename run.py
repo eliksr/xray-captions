@@ -199,6 +199,24 @@ def generate_desc(model, tokenizer, photo, max_length):
             break
     return in_text
 
+# evaluate the skill of the model
+def evaluate_model(model, descriptions, photos, tokenizer, max_length):
+    actual, predicted = list(), list()
+    # step over the whole set
+    for key, desc in descriptions.items():
+    # generate description
+        yhat = generate_desc(model, tokenizer, photos[key], max_length)
+        # store actual and predicted
+        actual.append([desc.split()])
+        predicted.append(yhat.split())
+        print('Actual:    %s' % desc)
+        print('Predicted: %s' % yhat)
+        if len(actual) >= 5:
+            break
+    # calculate BLEU score
+    bleu = corpus_bleu(actual, predicted)
+    return bleu
+
 
 # evaluate the skill of the model
 # def evaluate_model(model, descriptions, photos, tokenizer, max_length):
@@ -268,21 +286,3 @@ df.to_csv(model_name+'.csv', index=False)
 # generate photo captions
 model_name = 'baseline_generate'
 n_repeats = 1
-
-# evaluate the skill of the model
-def evaluate_model(model, descriptions, photos, tokenizer, max_length):
-    actual, predicted = list(), list()
-    # step over the whole set
-    for key, desc in descriptions.items():
-    # generate description
-        yhat = generate_desc(model, tokenizer, photos[key], max_length)
-        # store actual and predicted
-        actual.append([desc.split()])
-        predicted.append(yhat.split())
-        print('Actual:    %s' % desc)
-        print('Predicted: %s' % yhat)
-        if len(actual) >= 5:
-            break
-    # calculate BLEU score
-    bleu = corpus_bleu(actual, predicted)
-    return bleu

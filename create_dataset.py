@@ -6,6 +6,7 @@ from imgaug import augmenters as iaa
 import random
 import cv2
 import h5py
+import matplotlib.pyplot as plt
 
 sys = platform.system()
 home = '/home/elik' if sys == 'Linux' else '/Users/esror'
@@ -72,11 +73,34 @@ def get_dataset(df, img_size):
     # np.save(file='data/' + kind + '_labels_np_arr.npy', arr=y)
 
 
-if __name__ == '__main__':
-    df_train = pd.read_csv('iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
-    df_test = pd.read_csv('iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
-    df_val = pd.read_csv('iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
+def get_dogcat_dataset(img_size):
+    y = []
+    x = []
 
-    get_dataset(df_train)
-    get_dataset(df_test)
-    get_dataset(df_val)
+    for (dirpath, dirnames, filenames) in os.walk('dog_cat/train'):
+        for filename in filenames:
+            image = cv2.imread(os.sep.join([dirpath, filename]))  # cv2.IMREAD_GRAYSCALE
+            plt.imshow(image)
+            image = cv2.resize(image, (img_size, img_size))
+            plt.imshow(image)
+            x.append(image)
+            if filename.startswith('cat'):
+                y.append(1)
+            else:
+                y.append(0)
+    x = np.array(x)
+    y = np.array(y)
+
+    return x, y
+
+
+if __name__ == '__main__':
+    # df_train = pd.read_csv('iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
+    # df_test = pd.read_csv('iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
+    # df_val = pd.read_csv('iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
+    #
+    # get_dataset(df_train)
+    # get_dataset(df_test)
+    # get_dataset(df_val)
+
+    get_dogcat_dataset(256)
