@@ -126,7 +126,8 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
     # for layer in model.layers[:15]:
     #     layer.trainable = False
 
-    model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    # model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
     stop = EarlyStopping(monitor='acc',
                              min_delta=0.001,
@@ -161,9 +162,9 @@ if __name__ == '__main__':
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
     print("Splitting data into test/ train datasets")
-    df_train = pd.read_csv('data/iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
-    df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
-    df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
+    # df_train = pd.read_csv('data/iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
+    # df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
+    # df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
 
     # x_train , y_train = get_dataset(df_train, img_rows)
     # x_valid, y_valid = get_dataset(df_val, img_rows)
@@ -198,9 +199,9 @@ if __name__ == '__main__':
     x_valid /= 255
     x_test /= 255
 
-    y_train = np_utils.to_categorical(y_train, nb_classes)
-    y_valid = np_utils.to_categorical(y_valid, nb_classes)
-    y_test = np_utils.to_categorical(y_test, nb_classes)
+    # y_train = np_utils.to_categorical(y_train, nb_classes)
+    # y_valid = np_utils.to_categorical(y_valid, nb_classes)
+    # y_test = np_utils.to_categorical(y_test, nb_classes)
 
     print("y_train Shape: ", y_train.shape)
     print("y_train Shape: ", y_valid.shape)
