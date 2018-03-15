@@ -173,7 +173,7 @@ if __name__ == '__main__':
     # x_valid = x_test
     # y_valid = y_test
 
-    x, y = get_dogcat_dataset()
+    x, y = get_dogcat_dataset(img_rows)
 
     x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
     x_valid = x_test
