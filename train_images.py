@@ -20,6 +20,8 @@ from sklearn.model_selection import train_test_split
 from keras.datasets import cifar10
 
 
+# TODO: learning rate, Adam optimizer, all layer trainable, horizontal flip aug, Imagenet mean normalize
+
 def normalize_imagenet(arr):
     arr[:, :, 0] -= 103.939
     arr[:, :, 1] -= 116.779
@@ -72,7 +74,6 @@ def cnn_model_generator(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_e
     # im[:, :, 1] -= 116.779
     # im[:, :, 2] -= 123.68
 
-    # Compute principal components required for ZCA
     datagen.fit(x_train)
 
     # Apply normalization
@@ -88,7 +89,8 @@ def cnn_model_generator(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_e
                         steps_per_epoch=x_train.shape[0] // batch_size,
                         epochs=nb_epoch,
                         validation_data=(x_valid, y_valid),
-                        callbacks=[stop, tensor_board])
+                        callbacks=[stop, tensor_board],
+                        verbose=2)
 
     score = model.evaluate(x_test, y_test)
 
