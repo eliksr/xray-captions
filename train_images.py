@@ -162,23 +162,19 @@ if __name__ == '__main__':
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
     print("Splitting data into test/ train datasets")
-    # df_train = pd.read_csv('data/iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
-    # df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
-    # df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
+    df_train = pd.read_csv('data/iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
+    df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
+    df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
 
-    # x_train , y_train = get_dataset(df_train, img_rows)
-    # x_valid, y_valid = get_dataset(df_val, img_rows)
-    # x_test, y_test = get_dataset(df_test, img_rows)
+    x_train , y_train = get_dataset(df_train, img_rows)
+    x_valid, y_valid = get_dataset(df_val, img_rows)
+    x_test, y_test = get_dataset(df_test, img_rows)
 
-    # (x_train, y_train), (x_test, y_test) = cifar10.load_data()
+    # x, y = get_dogcat_dataset(img_rows)
+    #
+    # x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
     # x_valid = x_test
     # y_valid = y_test
-
-    x, y = get_dogcat_dataset(img_rows)
-
-    x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.20, random_state=42)
-    x_valid = x_test
-    y_valid = y_test
 
     print("Reshaping Data")
     print("X_train Shape: ", x_train.shape)
