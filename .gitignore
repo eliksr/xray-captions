@@ -5,4 +5,5 @@ Graph/
 __pycache__/
 *.h5
 dog_cat/
+NLMCXR_dcm/
 *.zip
