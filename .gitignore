@@ -6,4 +6,7 @@ __pycache__/
 *.h5
 dog_cat/
 NLMCXR_dcm/
+data/front/
+data/other/
+data/side/
 *.zip
