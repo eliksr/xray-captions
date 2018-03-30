@@ -7,6 +7,7 @@ import random
 import cv2
 import h5py
 import matplotlib.pyplot as plt
+import dicom
 
 sys = platform.system()
 home = '/home/elik' if sys == 'Linux' else '/Users/esror'
@@ -29,6 +30,15 @@ def write_pickle(data_to_write, file_path):
     # with open(file_path, 'wb') as f_out:
     #     for idx in range(0, len(bytes_out), max_bytes):
     #         f_out.write(bytes_out[idx:idx + max_bytes])
+
+
+def get_dicom_data(img_path):
+    ds = dicom.read_file(img_path)
+    img = ds.pixel_array.astype(np.float32)
+    if ds.PhotometricInterpretation == 'MONOCHROME1':
+        maxI = np.amax(img)
+        img = (2 ** int(np.ceil(np.log2(maxI - 1)))) - 1 - img
+    return img
 
 
 def get_dataset(df, img_size):
