@@ -6,7 +6,7 @@ import os
 
 # part 1
 # df = DataFrame pandas, read spreadsheet
-df = pd.read_csv('/Users/esror/Documents/EliksDocs/thsis_files/learning-to-read-master/data/chestx/MeSH/processed/openi.mesh.csv')
+df = pd.read_csv('/Users/esror/Documents/EliksDocs/thsis_files/learning-to-read-master-2/data/chestx/MeSH/processed/openi.mesh.csv')
 onehot_indexes = df['onehot_index'].unique()
 print (onehot_indexes)
 
