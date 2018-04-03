@@ -11,7 +11,7 @@ import dicom
 
 sys = platform.system()
 home = '/home/elik' if sys == 'Linux' else '/Users/esror'
-root = home + '/PycharmProjects/captioning_keras/croped'
+root = home + '/PycharmProjects/captioning_keras/data/front'
 
 # augmentation functions
 flipper = iaa.Fliplr(1.0)
@@ -38,10 +38,12 @@ def get_dicom_data(img_path):
     if ds.PhotometricInterpretation == 'MONOCHROME1':
         maxI = np.amax(img)
         img = (2 ** int(np.ceil(np.log2(maxI - 1)))) - 1 - img
+
+    img = np.repeat(img[..., None], 3, axis=2)
     return img
 
 
-def get_dataset(df, img_size):
+def get_dataset(df, img_size, isDicom=False):
     y = []
     X = []
     for index, row in df.iterrows():
@@ -49,7 +51,7 @@ def get_dataset(df, img_size):
         # image = img_to_array(image)
         file_path = os.path.join(root, row.file_name)
         if os.path.exists(file_path):
-            image = cv2.imread(file_path)  # cv2.IMREAD_GRAYSCALE
+            image = get_dicom_data(file_path) if isDicom else cv2.imread(file_path)  # cv2.IMREAD_GRAYSCALE
             image = cv2.resize(image, (img_size, img_size))
             image = np.array(image)
 

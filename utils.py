@@ -57,6 +57,31 @@ def show_img(file):
         plt.imshow(img, cmap=pylab.cm.binary)
 
 
+def rewrite_mesh_file():
+    with open('data/front_imgs.txt', 'r')as f:
+        lines = list(map(lambda x: x.replace('\n', ''), f.readlines()))
+
+    with open('MeSH/original/openi.mesh.top', 'r')as f:
+        original_lines = f.readlines()
+
+    res_img = []
+    miss_img = []
+    root = 'data/front'
+    count = 0
+    for line in original_lines:
+        index = line.index('|')
+        img_file = line.split('|')[0].split('/')[-1].replace('png', 'dcm')
+        if img_file in lines:
+            res_img.append(os.path.join(root, img_file) + line[index:])
+            count = count +1
+
+    with open('MeSH/original/openi.mesh.top.new', 'w') as f:
+        f.writelines(res_img)
+
+    print(len(res_img))
+
+
 if __name__ == '__main__':
     # show_img('data/non_list.txt')
-    split_to_folders()
+    # split_to_folders()
+    rewrite_mesh_file()

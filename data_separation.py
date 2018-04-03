@@ -6,7 +6,7 @@ import os
 
 # part 1
 # df = DataFrame pandas, read spreadsheet
-df = pd.read_csv('/Users/esror/Documents/EliksDocs/thsis_files/learning-to-read-master-2/data/chestx/MeSH/processed/openi.mesh.csv')
+df = pd.read_csv('MeSH/processed/openi.mesh.csv')
 onehot_indexes = df['onehot_index'].unique()
 print (onehot_indexes)
 
@@ -144,3 +144,10 @@ with open('data/iter0_im_val_0.csv', 'w') as csvf:
     for fl_pairi in fl_pairs_val:
         csvw.writerow([fl_pairi[0], fl_pairi[1]])
 for csvfi in glob.glob('data/iter0*.csv'): print (csvfi)
+
+
+with open('data/label_names.csv', 'w') as csvf:
+    csvw = csv.writer(csvf, delimiter=' ', quotechar=' ')
+    for i2 in range(len(ds)):
+        label_names = df_tr.loc[df['onehot_index']==ds_index[i2]]['mesh_top']
+        csvw.writerow([i2, label_names.iloc[0]])

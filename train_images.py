@@ -130,7 +130,7 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
     model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
     stop = EarlyStopping(monitor='acc',
-                             min_delta=0.001,
+                             min_delta=0.0001,
                              patience=2,
                              verbose=1,
                              mode='auto')
@@ -157,7 +157,7 @@ if __name__ == '__main__':
     batch_size = 64
     nb_epoch = 50
     img_rows, img_cols = 256, 256
-    nb_classes = 1
+    nb_classes = 9
     channels = 3
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
@@ -166,9 +166,9 @@ if __name__ == '__main__':
     df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
     df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
 
-    x_train , y_train = get_dataset(df_train, img_rows)
-    x_valid, y_valid = get_dataset(df_val, img_rows)
-    x_test, y_test = get_dataset(df_test, img_rows)
+    x_train , y_train = get_dataset(df_train, img_rows, isDicom=True)
+    x_valid, y_valid = get_dataset(df_val, img_rows, isDicom=True)
+    x_test, y_test = get_dataset(df_test, img_rows, isDicom=True)
 
     # x, y = get_dogcat_dataset(img_rows)
     #
@@ -176,11 +176,11 @@ if __name__ == '__main__':
     # x_valid = x_test
     # y_valid = y_test
 
-    print("Reshaping Data")
-    print("X_train Shape: ", x_train.shape)
-    x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, channels)
-    x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, channels)
-    x_valid = x_valid.reshape(x_valid.shape[0], img_rows, img_cols, channels)
+    # print("Reshaping Data")
+    # print("X_train Shape: ", x_train.shape)
+    # x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, channels)
+    # x_test = x_test.reshape(x_test.shape[0], img_rows, img_cols, channels)
+    # x_valid = x_valid.reshape(x_valid.shape[0], img_rows, img_cols, channels)
 
     print("X_train Shape: ", x_train.shape)
     print("X_valid Shape: ", x_valid.shape)
@@ -195,9 +195,9 @@ if __name__ == '__main__':
     x_valid /= 255
     x_test /= 255
 
-    # y_train = np_utils.to_categorical(y_train, nb_classes)
-    # y_valid = np_utils.to_categorical(y_valid, nb_classes)
-    # y_test = np_utils.to_categorical(y_test, nb_classes)
+    y_train = np_utils.to_categorical(y_train, nb_classes)
+    y_valid = np_utils.to_categorical(y_valid, nb_classes)
+    y_test = np_utils.to_categorical(y_test, nb_classes)
 
     print("y_train Shape: ", y_train.shape)
     print("y_train Shape: ", y_valid.shape)
