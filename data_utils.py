@@ -5,9 +5,9 @@ import platform
 from imgaug import augmenters as iaa
 import random
 import cv2
-import h5py
 import matplotlib.pyplot as plt
 import dicom
+
 
 sys = platform.system()
 home = '/home/elik' if sys == 'Linux' else '/Users/esror'
@@ -32,6 +32,21 @@ def write_pickle(data_to_write, file_path):
     #         f_out.write(bytes_out[idx:idx + max_bytes])
 
 
+def preprocessing_image(arr):
+    arr = arr.astype('float32')
+
+    # 'RGB'->'BGR'
+    arr = arr[..., ::-1]
+    mean = [103.939, 116.779, 123.68]
+    arr[..., 0] -= mean[0]
+    arr[..., 1] -= mean[1]
+    arr[..., 2] -= mean[2]
+
+    arr /= 255
+
+    return arr
+
+
 def load_dicom_img(img_path, img_size):
     ds = dicom.read_file(img_path)
     img = ds.pixel_array.astype(np.float32)
@@ -53,7 +68,7 @@ def get_dataset(df, img_size, isDicom=False):
         file_path = os.path.join(root, row.file_name)
         if os.path.exists(file_path):
             if isDicom:
-                image = load_dicom_img(file_path)
+                image = load_dicom_img(file_path, img_size)
             else:
                 image = cv2.imread(file_path) # cv2.IMREAD_GRAYSCALE
                 image = cv2.resize(image, (img_size, img_size))
@@ -63,14 +78,13 @@ def get_dataset(df, img_size, isDicom=False):
                 aug_indx = random.randint(0,2)
                 aug_func = aug_lst[aug_indx]
                 aug_img = aug_func.augment_image(image)
-                # aug_img = preprocess_input(aug_img)
+                aug_img = preprocessing_image(aug_img)
 
                 X.append(aug_img)
                 y.append(row.label)
 
-            # image = preprocess_input(image)
-            # image = image[..., np.newaxis]
-            # image = np.dstack([image.astype(np.uint8)] * 3)
+            image = preprocessing_image(image)
+
             X.append(image)
             y.append(row.label)
 
@@ -109,12 +123,10 @@ def get_dogcat_dataset(img_size):
 
 
 if __name__ == '__main__':
-    # df_train = pd.read_csv('iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
+    df_train = pd.read_csv('iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
     # df_test = pd.read_csv('iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
     # df_val = pd.read_csv('iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
     #
-    # get_dataset(df_train)
+    get_dataset(df_train)
     # get_dataset(df_test)
     # get_dataset(df_val)
-
-    get_dogcat_dataset(256)

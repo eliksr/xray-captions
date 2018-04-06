@@ -13,21 +13,14 @@ from keras.utils import np_utils
 from keras.optimizers import Adam
 from sklearn.metrics import precision_score, recall_score, f1_score
 from keras.preprocessing.image import ImageDataGenerator
-from create_dataset import get_dataset, get_dogcat_dataset
+from data_utils import get_dataset, get_dogcat_dataset
 import numpy as np
 import pandas as pd
+from keras import backend as K
 from sklearn.model_selection import train_test_split
-from keras.datasets import cifar10
 
 
 # TODO: learning rate, Adam optimizer, all layer trainable, horizontal flip aug, Imagenet mean normalize
-
-def normalize_imagenet(arr):
-    arr[:, :, 0] -= 103.939
-    arr[:, :, 1] -= 116.779
-    arr[:, :, 2] -= 123.68
-    return arr
-
 
 def cnn_model_generator(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
 
@@ -97,21 +90,16 @@ def cnn_model_generator(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_e
     return model, score
 
 
-def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes):
+def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes, image_size):
 
-    model_vgg16_conv = VGG16(weights='imagenet', include_top=False)
+    model_vgg16_conv = VGG16(weights='imagenet', include_top=False, input_shape=(image_size, image_size, 3))
     # model_vgg16_conv.summary()
-    for layer in model_vgg16_conv.layers[:25]:
+    for layer in model_vgg16_conv.layers[:-4]:
         layer.trainable = False
 
-    # Create your own input format (here 3x200x200)
-    input = Input(shape=(256, 256, 3), name='image_input')
-
-    # Use the generated model
-    output_vgg16_conv = model_vgg16_conv(input)
-
+    x = model_vgg16_conv.output
     # Add the fully-connected layers
-    x = Flatten(name='flatten')(output_vgg16_conv)
+    x = Flatten(name='flatten')(x)
     x = Dense(4096, activation='relu', name='fc1')(x)
     # x = Dropout(0.5)(x)
     x = Dense(4096, activation='relu', name='fc2')(x)
@@ -119,15 +107,10 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
     x = Dense(nb_classes, activation='softmax', name='predictions')(x)
 
     # Create your own model
-    model = Model(input=input, output=x)
+    model = Model(input=model_vgg16_conv.input, output=x)
 
-    # # set the first 25 layers (up to the last conv block)
-    # # to non-trainable (weights will not be updated)
-    # for layer in model.layers[:15]:
-    #     layer.trainable = False
-
-    # model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
-    model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    model.compile(loss='categorical_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
+    # model.compile(loss='binary_crossentropy', optimizer=Adam(lr=0.001), metrics=['accuracy'])
 
     stop = EarlyStopping(monitor='acc',
                              min_delta=0.0001,
@@ -136,10 +119,6 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
                              mode='auto')
 
     tensor_board = TensorBoard(log_dir='./Graph', histogram_freq=0, write_graph=True, write_images=True)
-
-    x_train = normalize_imagenet(x_train)
-    x_test = normalize_imagenet(x_test)
-    x_valid = normalize_imagenet(x_valid)
 
     model.fit(x_train, y_train, batch_size=batch_size, epochs=nb_epoch,
               verbose=1,
@@ -156,7 +135,7 @@ def cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batc
 if __name__ == '__main__':
     batch_size = 64
     nb_epoch = 50
-    img_rows, img_cols = 256, 256
+    image_size = 224
     nb_classes = 9
     channels = 3
     root = '/home/elik/PycharmProjects/captioning_keras/croped'
@@ -166,9 +145,10 @@ if __name__ == '__main__':
     df_test = pd.read_csv('data/iter0_im_te.csv', names=['file_name', 'label', 'do_aug'])
     df_val = pd.read_csv('data/iter0_im_val.csv', names=['file_name', 'label', 'do_aug'])
 
-    x_train , y_train = get_dataset(df_train, img_rows, isDicom=True)
-    x_valid, y_valid = get_dataset(df_val, img_rows, isDicom=True)
-    x_test, y_test = get_dataset(df_test, img_rows, isDicom=True)
+    print("Read data with normalization and augmentation")
+    x_train , y_train = get_dataset(df_train, image_size, isDicom=True)
+    x_valid, y_valid = get_dataset(df_val, image_size, isDicom=True)
+    x_test, y_test = get_dataset(df_test, image_size, isDicom=True)
 
     # x, y = get_dogcat_dataset(img_rows)
     #
@@ -186,15 +166,6 @@ if __name__ == '__main__':
     print("X_valid Shape: ", x_valid.shape)
     print("X_test Shape: ", x_test.shape)
 
-    print("Normalizing Data")
-    x_train = x_train.astype('float32')
-    x_valid = x_valid.astype('float32')
-    x_test = x_test.astype('float32')
-
-    x_train /= 255
-    x_valid /= 255
-    x_test /= 255
-
     y_train = np_utils.to_categorical(y_train, nb_classes)
     y_valid = np_utils.to_categorical(y_valid, nb_classes)
     y_test = np_utils.to_categorical(y_test, nb_classes)
@@ -203,7 +174,7 @@ if __name__ == '__main__':
     print("y_train Shape: ", y_valid.shape)
     print("y_test Shape: ", y_test.shape)
 
-    model, score = cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes)
+    model, score = cnn_model(x_train, y_train, x_valid, y_valid, x_test, y_test, nb_epoch, batch_size, nb_classes, image_size)
     model.save('vgg_model.h5')
     print("Test Score:", score[0])
     print("Test Accuracy:", score[1])
