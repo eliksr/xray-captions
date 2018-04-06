@@ -32,13 +32,14 @@ def write_pickle(data_to_write, file_path):
     #         f_out.write(bytes_out[idx:idx + max_bytes])
 
 
-def get_dicom_data(img_path):
+def load_dicom_img(img_path, img_size):
     ds = dicom.read_file(img_path)
     img = ds.pixel_array.astype(np.float32)
     if ds.PhotometricInterpretation == 'MONOCHROME1':
         maxI = np.amax(img)
         img = (2 ** int(np.ceil(np.log2(maxI - 1)))) - 1 - img
 
+    img = cv2.resize(img, (img_size, img_size))
     img = np.repeat(img[..., None], 3, axis=2)
     return img
 
@@ -51,10 +52,13 @@ def get_dataset(df, img_size, isDicom=False):
         # image = img_to_array(image)
         file_path = os.path.join(root, row.file_name)
         if os.path.exists(file_path):
-            image = get_dicom_data(file_path) if isDicom else cv2.imread(file_path)  # cv2.IMREAD_GRAYSCALE
-            image = cv2.resize(image, (img_size, img_size))
-            image = np.array(image)
+            if isDicom:
+                image = load_dicom_img(file_path)
+            else:
+                image = cv2.imread(file_path) # cv2.IMREAD_GRAYSCALE
+                image = cv2.resize(image, (img_size, img_size))
 
+            image = np.array(image)
             if row.do_aug == 1:
                 aug_indx = random.randint(0,2)
                 aug_func = aug_lst[aug_indx]

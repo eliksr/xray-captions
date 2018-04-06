@@ -9,4 +9,5 @@ NLMCXR_dcm/
 data/front/
 data/other/
 data/side/
+Flickr8k_text/
 *.zip
