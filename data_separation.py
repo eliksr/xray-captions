@@ -266,12 +266,12 @@ random.shuffle(fl_imcaps_tr_sp)
 random.shuffle(fl_imcaps_te)
 random.shuffle(fl_imcaps_val)
 with open('data/iter0_imcaps_te.csv', 'w') as csvf:
-    csvw = csv.writer(csvf, delimiter=' ', quotechar=' ')
+    csvw = csv.writer(csvf, delimiter=',', quotechar=' ')
     for fl_pairi in fl_imcaps_te:
         csvw.writerow(fl_pairi)
 
 with open('data/label_names.csv', 'w') as csvf:
-    csvw = csv.writer(csvf, delimiter=' ', quotechar=' ')
+    csvw = csv.writer(csvf, delimiter=',', quotechar=' ')
     for i2 in range(len(ds)):
         label_names = df_tr.loc[df['onehot_index']==ds_index[i2]]['mesh_top']
         csvw.writerow([i2, label_names.iloc[0]])
@@ -286,7 +286,7 @@ for i in range(max_rnn_epoch):
     if not os.path.exists(inputs_dir_epochi):
         os.makedirs(inputs_dir_epochi)
     with open(os.path.join(inputs_dir_epochi, 'input.txt'), 'w') as csvf:
-        csvw = csv.writer(csvf, delimiter=' ', quotechar=' ')
+        csvw = csv.writer(csvf, delimiter=',', quotechar=' ')
         random.shuffle(fl_paris_tr_sa_val)
         for fl_pairi in fl_paris_tr_sa_val:
             if fl_pairi[1]==str(max_label) and np.random.random_sample() > normal_max_ratio:

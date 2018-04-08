@@ -138,7 +138,6 @@ if __name__ == '__main__':
     image_size = 224
     nb_classes = 9
     channels = 3
-    root = '/home/elik/PycharmProjects/captioning_keras/croped'
 
     print("Splitting data into test/ train datasets")
     df_train = pd.read_csv('data/iter0_im_tr_sa.csv', names=['file_name', 'label', 'do_aug'])
